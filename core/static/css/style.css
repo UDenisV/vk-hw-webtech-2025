@@ -1,0 +1,149 @@
+:root {
+    --primary_green: #49fe8c;
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    gap: 12px;
+
+    background-color: antiquewhite;
+    border-bottom: 1px solid gray;
+}
+
+header input[type="text"] {
+    outline: none;
+    background: none;
+    border: 1px solid gray;
+    border-radius: 4px;
+    padding: 6px;
+
+    min-width: 32%;
+}
+
+header .search-button {
+    border: none;
+    color: white;
+    background-color: var(--primary_green);
+    padding: 6px;
+
+    -webkit-box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.8);
+    -moz-box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.8);
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.8);
+}
+
+header .logo {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+main {
+    display: flex;
+    justify-content: start;
+}
+
+.main-container {
+    margin-top: 24px;
+    width: 70%;
+    padding: 0 24px;
+}
+
+.questions-list {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.question {
+    padding: 6px;
+    border: 1px solid black;
+}
+
+.question-title {
+    font-size: 24px;
+    color: blueviolet;
+}
+
+.question-content {
+    margin-top: 12px;
+    margin-left: 12px;
+}
+
+.main-container h2 a {
+    font-size: 12px;
+    text-decoration: none;
+    color: lightseagreen;
+}
+
+.main-container h2 a:hover {
+    text-decoration: underline;
+}
+
+aside {
+    margin-top: 24px;
+    width: 30%;
+    padding: 0 24px;
+}
+
+.tags-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-family: "Coming Soon", cursive;
+}
+
+.text-red {
+    color: red;
+}
+
+.text-green {
+    color: green;
+}
+
+.pagination {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-content: center;
+    gap: 12px;
+}
+
+.pagination a {
+    text-decoration: none;
+    color: white;
+    background: rgba(0, 0, 0, .2);
+    padding: 6px;
+    border-radius: 4px;
+    transition: .15s ease-in-out;
+}
+
+.pagination a {
+    text-decoration: none;
+    color: white;
+    background: rgba(0, 0, 0, .2);
+    padding: 6px;
+    border-radius: 4px;
+    transition: .15s ease-in-out;
+}
+
+.pagination a:hover, a:focus-visible {
+    background: rgba(0, 0, 0, .4);
+}
