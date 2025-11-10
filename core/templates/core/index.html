@@ -16,7 +16,7 @@
 <body>
     <header>
         <div class="logo">
-            AskPumpkin
+            <a href="{% url 'index' %}">AskPumpkin</a>
         </div>
         <div class="search">
             <input type="text" name="search" placeholder="search">
@@ -34,7 +34,20 @@
         </div>
     </header>
     <main>
-        <div class="main-container">
+    <div class="main-container">
+        {% if question %}
+            <h2>{{ question.title }}</h2>
+                <p>{{ question.detailed }}</p>
+                <p><strong>Автор:</strong> {{ question.author.username }} ||
+                <strong>Теги:</strong>
+                    {% for tag in question.tags.all %}
+                        <span class="tag">{{ tag.title }}</span>{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Нет тегов
+                    {% endfor %}
+            </p>
+            <a href="{% url 'index' %}">← Назад к списку</a>
+        {% else %}
             <h2>
                 New Questions
                 <span><a href="#">Hot Questions</a></span>
@@ -42,7 +55,9 @@
             <div class="questions-list">
                 {% for question in new_questions %}
                     <div class="question">
-                        <a href="" class="question-title">{{ question.title }}</a>
+                        <a href="{% url 'question_detail' question.id %}" class="question-title">
+                            {{ question.title }}
+                        </a>
                         <p class="question-content">{{ question.detailed }}</p>
                     </div>
                 {% endfor %}
@@ -53,18 +68,20 @@
                     <a href="/?page={{ page }}">{{ page }}</a>
                 {% endfor %}
             </div>
+        {% endif %}
+    </div>
 
-        </div>
-        <aside>
-            <div class="tags-container">
-                <h3>Popular Tags</h3>
-                <div class="tags">
-                    {% for tag in tags %}
-                        <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>
-                    {% endfor %}
-                </div>
+    <aside>
+        <div class="tags-container">
+            <h3>Popular Tags</h3>
+            <div class="tags">
+                {% for tag in tags %}
+                    <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>
+                {% endfor %}
             </div>
-        </aside>
-    </main>
+        </div>
+    </aside>
+</main>
+
 </body>
 </html>
