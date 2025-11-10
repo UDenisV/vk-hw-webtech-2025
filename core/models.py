@@ -31,6 +31,7 @@ class Question(DefaultModel):
     detailed = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     tags = models.ManyToManyField('Tag', blank=True, verbose_name='Теги')
+    rating = models.IntegerField(default=0, verbose_name="Рейтинг")
 
     def __str__(self):
         return str(self.title)
@@ -48,9 +49,24 @@ class Answer(DefaultModel):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     answer_text = models.TextField()
+    rating = models.IntegerField(default=0, verbose_name="Рейтинг")
+    is_correct = models.BooleanField(default=False, verbose_name="Правильный ответ")
 
     def __str__(self):
         return f"Ответ на вопрос ID = {str(self.question_id)}"
+
+
+class AnswerVote(models.Model):
+    UPVOTE = 1
+    DOWNVOTE = -1
+    VOTE_CHOICES = [(UPVOTE, "Upvote"), (DOWNVOTE, "Downvote")]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    value = models.SmallIntegerField(choices=VOTE_CHOICES)
+
+    class Meta:
+        unique_together = ("user", "answer")
 
 
 class Tag(models.Model):
@@ -62,3 +78,23 @@ class Tag(models.Model):
 
     def __str__(self):
         return str(self.title)
+
+
+class Vote(models.Model):
+    UPVOTE = 1
+    DOWNVOTE = -1
+
+    VOTE_CHOICES = [
+        (UPVOTE, 'Upvote'),
+        (DOWNVOTE, 'Downvote'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    value = models.SmallIntegerField(choices=VOTE_CHOICES)
+
+    class Meta:
+        unique_together = ('user', 'question')
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.question.title}: {self.value}"

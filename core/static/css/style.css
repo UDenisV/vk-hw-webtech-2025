@@ -156,3 +156,38 @@ aside {
 .pagination a:hover, a:focus-visible {
     background: rgba(0, 0, 0, .4);
 }
+
+.question-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar-small {
+    width: 40px;
+    height: 40px;
+    background: lightgray;
+    border-radius: 50%;
+}
+
+.question-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.rating button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.best-users ul {
+    list-style: none;
+    padding: 0;
+}
+
+.best-users li {
+    margin-bottom: 4px;
+}

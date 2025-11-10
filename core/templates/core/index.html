@@ -35,9 +35,13 @@
     <main>
     <div class="main-container">
             <h2>
-                New Questions
-                <span><a href="#">Hot Questions</a></span>
+                Questions
+                <span>
+                    <a href="/?sort=date" {% if sort == 'date' %}class="active"{% endif %}>New</a> |
+                    <a href="/?sort=rating" {% if sort == 'rating' %}class="active"{% endif %}>Hot</a>
+                </span>
             </h2>
+
             <div class="questions-list">
                 {% for question in new_questions %}
                     <div class="question">
@@ -45,13 +49,32 @@
                             {{ question.title }}
                         </a>
                         <p class="question-content">{{ question.detailed }}</p>
-                        <p class="question-content"> Тeги:
-                        {% for tag in question.tags.all %}
-                        <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                            Нет тегов
-                        {% endfor %}
+                        <p>Теги:
+                            {% for tag in question.tags.all %}
+                                <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                Нет тегов
+                            {% endfor %}
                         </p>
+
+                        <p>
+                            <a href="{% url 'question_detail' question.id %}">
+                                Ответов: {{ question.answer_set.count }}
+                            </a>
+                        </p>
+
+                        <p>Рейтинг: {{ question.rating }}</p>
+
+                        {% if user.is_authenticated %}
+                            <form method="post" action="{% url 'index' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="question_id" value="{{ question.id }}">
+                                <button type="submit" name="vote" value="up">+</button>
+                                <button type="submit" name="vote" value="down">-</button>
+                            </form>
+                        {% else %}
+                            <p>Авторизуйтесь, чтобы голосовать</p>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
@@ -70,6 +93,15 @@
                     <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>
                 {% endfor %}
             </div>
+        </div>
+
+        <div class="best-users">
+            <h3>Best Users</h3>
+            <ul>
+                {% for user in best_users %}
+                    <li>{{ user.username }}</li>
+                {% endfor %}
+            </ul>
         </div>
     </aside>
 </main>
