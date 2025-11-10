@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="icon" href="{% static 'images/layout-list.svg' %}">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Coming+Soon&display=swap" rel="stylesheet">
@@ -35,19 +34,6 @@
     </header>
     <main>
     <div class="main-container">
-        {% if question %}
-            <h2>{{ question.title }}</h2>
-                <p>{{ question.detailed }}</p>
-                <p><strong>Автор:</strong> {{ question.author.username }} ||
-                <strong>Теги:</strong>
-                    {% for tag in question.tags.all %}
-                        <span class="tag">{{ tag.title }}</span>{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                        Нет тегов
-                    {% endfor %}
-            </p>
-            <a href="{% url 'index' %}">← Назад к списку</a>
-        {% else %}
             <h2>
                 New Questions
                 <span><a href="#">Hot Questions</a></span>
@@ -59,16 +45,21 @@
                             {{ question.title }}
                         </a>
                         <p class="question-content">{{ question.detailed }}</p>
+                        <p class="question-content"> Тeги:
+                        {% for tag in question.tags.all %}
+                        <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            Нет тегов
+                        {% endfor %}
+                        </p>
                     </div>
                 {% endfor %}
             </div>
-
             <div class="pagination">
                 {% for page in pages %}
                     <a href="/?page={{ page }}">{{ page }}</a>
                 {% endfor %}
             </div>
-        {% endif %}
     </div>
 
     <aside>

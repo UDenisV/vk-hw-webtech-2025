@@ -1,0 +1,85 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/question.css' %}">
+    <link rel="icon" href="{% static 'images/layout-list.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Coming+Soon&display=swap" rel="stylesheet">
+    <title>{{ question.title }}</title>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{% url 'index' %}">AskPumpkin</a>
+        </div>
+        <div class="search">
+            <input type="text" name="search" placeholder="search">
+            <button class="search-button">ASK!</button>
+        </div>
+        <div class="profile">
+            <div class="avatar"></div>
+            <div class="profile-info">
+                <p>FIO</p>
+                <div class="profile-actions">
+                    <a href="#">settings</a>
+                    <a href="#">logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+    <div class="main-container">
+        <h2>{{ question.title }}</h2>
+        <p>{{ question.detailed }}</p>
+        <p><strong>Автор:</strong> {{ question.author.username }}</p>
+        <p><strong>Теги:</strong>
+            {% for tag in question.tags.all %}
+                <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                Нет тегов
+            {% endfor %}
+        </p>
+
+        <h3>Ответы</h3>
+        <div class="answers-list">
+            {% for answer in question.answer_set.all %}
+                <div class="answer">
+                    <p>{{ answer.answer_text }}</p>
+                    <small>Автор: {{ answer.author.username }} | {{ answer.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+            {% empty %}
+                <p>Пока нет ответов.</p>
+            {% endfor %}
+        </div>
+
+        <h3>Добавить ответ</h3>
+        <form method="post" action="">
+            {% csrf_token %}
+            {% if not request.user.is_authenticated %}
+                <input type="text" name="guest_name" placeholder="Ваше имя" required>
+            {% endif %}
+            <textarea name="answer_text" placeholder="Ваш ответ..." required></textarea>
+            <button type="submit">Отправить</button>
+        </form>
+
+        <a href="{% url 'index' %}">← Назад к списку</a>
+    </div>
+
+        <aside>
+            <div class="tags-container">
+                <h3>Популярные теги</h3>
+                <div class="tags">
+                    {% for tag in tags %}
+                        <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
+    </main>
+</body>
+</html>

@@ -11,7 +11,7 @@ class UserAdmin(UserAdmin): # class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'is_active', 'created_at', 'updated_at')
+    list_display = ('id', 'title', 'author', 'is_active', 'created_at', 'updated_at')
 
     class AnswerInline(admin.TabularInline):
         model = Answer
@@ -22,7 +22,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('question', 'author', 'is_active', 'created_at', 'updated_at')
+    list_display = ('id', 'question', 'author', 'is_active', 'created_at', 'updated_at')
 
 
 @admin.register(Tag)

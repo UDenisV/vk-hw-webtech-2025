@@ -1,0 +1,50 @@
+@import url('style.css');
+
+.answer {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px;
+    margin: 8px 0;
+    background-color: #fafafa;
+}
+
+.answer-author {
+    font-size: 0.9em;
+    color: gray;
+}
+
+textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+}
+
+button {
+    margin-top: 6px;
+    background-color: var(--primary_green);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #37c96e;
+}
+
+.tag:hover {
+    background-color: var(--primary_green);
+    color: white;
+    transition: 0.2s;
+}
+
+input[name="guest_name"] {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}

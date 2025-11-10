@@ -4,11 +4,14 @@ from django.shortcuts import render
 from django.views import View
 from django.views.generic import TemplateView
 from django.http import JsonResponse, HttpResponse
-
-from core.models import Question, Tag
+from django.shortcuts import redirect
+from django.views.generic.detail import DetailView
+from core.models import Question, Tag, Answer
+from django.contrib.auth import get_user_model
 
 
 # Контроллеры приложения (обработчики запросов).
+
 def index(request):
     print(request)
     return render(request, 'core/index.html')
@@ -49,3 +52,47 @@ class IndexView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         print(request)
         return super(IndexView, self).dispatch(request, *args, **kwargs)
+
+
+class QuestionDetailView(DetailView):
+    model = Question
+    template_name = "core/question_detail.html"
+    context_object_name = "question"
+    pk_url_kwarg = "id"
+
+    def post(self, request, *args, **kwargs):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        question = self.get_object()
+        answer_text = request.POST.get("answer_text", "").strip()
+        guest_name = request.POST.get("guest_name", "").strip()
+
+        if not answer_text:
+            return redirect(request.path)
+
+        if request.user.is_authenticated:
+            author = request.user
+        else:
+            author, _ = User.objects.get_or_create(
+                username="Anonymous",
+                defaults={"password": "!"}
+            )
+            if guest_name:
+                answer_text = f"{guest_name} (гость): {answer_text}"
+            else:
+                answer_text = f"Гость: {answer_text}"
+
+        Answer.objects.create(
+            question=question,
+            author=author,
+            answer_text=answer_text
+        )
+
+        return redirect(request.path)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['answers'] = Answer.objects.filter(question=self.object)
+        context['tags'] = Tag.objects.all()
+        return context
