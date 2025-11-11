@@ -176,11 +176,15 @@ class TagView(TemplateView):
         question_id = request.POST.get("question_id")
         vote_value = request.POST.get("vote")
         if question_id and vote_value and request.user.is_authenticated:
-            question = get_object_or_404(Question, id=question_id)
-            val = 1 if vote_value == "up" else -1
-            vote, created = Vote.objects.get_or_create(user=request.user, question=question, defaults={"value": val})
-            if not created and vote.value != val:
-                vote.value = val
+            question = Question.objects.get(id=question_id)
+            vote_val = 1 if vote_value == "up" else -1
+            vote, created = Vote.objects.get_or_create(
+                user=request.user,
+                question=question,
+                defaults={"value": vote_val}
+            )
+            if not created and vote.value != vote_val:
+                vote.value = vote_val
                 vote.save()
             question.rating = Vote.objects.filter(question=question).aggregate(total=models.Sum("value"))["total"] or 0
             question.save()
@@ -242,14 +246,6 @@ class QuestionDetailView(DetailView):
         answer_text = request.POST.get("answer_text", "").strip()
         if answer_text and request.user.is_authenticated:
             answer = Answer.objects.create(question=question, author=request.user, answer_text=answer_text)
-            if question.author.email:
-                link = request.build_absolute_uri(reverse("question_detail", kwargs={"id": question.id}))
-                send_mail(
-                    subject=f"Новый ответ на ваш вопрос: {question.title}",
-                    message=f"Появился новый ответ. Посмотреть: {link}",
-                    from_email="no-reply@askpumpkin.com",
-                    recipient_list=[question.author.email]
-                )
         return redirect(request.path)
 
 @method_decorator(login_required, name='dispatch')
