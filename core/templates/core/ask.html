@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Задать вопрос</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Coming+Soon&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <a href="{% url 'index' %}">AskPumpkin</a>
+        </div>
+        <div class="search">
+            <input type="text" name="search" placeholder="search">
+            <button class="search-button">ASK!</button>
+        </div>
+        <div class="profile">
+            {% if user.is_authenticated %}
+                <div class="avatar">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
+                    {% else %}
+                        <img src="{% static 'images/avatar-default.svg' %}" alt="{{ user.username }}">
+                    {% endif %}
+                </div>
+                <div class="profile-info">
+                    <p>{{ user.username }}</p>
+                    <div class="profile-actions">
+                        <a href="{% url 'user_settings' %}">settings</a>
+                        <a href="{% url 'logout_view' %}">logout</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="profile-info">
+                    <p>Вы не авторизованы</p>
+                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'signup' %}">Signup</a>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+<main>
+<div class="main-container">
+    <h2>Задать вопрос</h2>
+
+    <form method="post" action="">
+        {% csrf_token %}
+
+        <div class="form-field">
+            <label for="id_title">Заголовок:</label>
+            <input type="text" id="id_title" name="title" maxlength="200" value="{{ title_input|default:'' }}">
+            {% if form_errors_title %}
+                <div class="error">
+                    {% for error in form_errors_title %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label for="id_detailed">Текст вопроса:</label>
+            <textarea id="id_detailed" name="detailed">{{ detailed_input|default:'' }}</textarea>
+            {% if form_errors_detailed %}
+                <div class="error">
+                    {% for error in form_errors_detailed %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label for="id_tags">Теги (через запятую, максимум 3):</label>
+            <input type="text" id="id_tags" name="tags" placeholder="Введите теги через запятую" value="{{ tags_input|default:'' }}">
+            {% if form_errors_tags %}
+                <div class="error">
+                    {% for error in form_errors_tags %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit">Добавить вопрос</button>
+    </form>
+</div>
+
+<aside>
+    <div class="tags-container">
+        <h3>Популярные теги</h3>
+        <div class="tags">
+            {% for tag in tags %}
+                <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="best-users">
+        <h3>Лучшие пользователи</h3>
+        <ul>
+            {% for user in best_users %}
+                <li>{{ user.username }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</aside>
+</main>
+
+<script>
+$(function() {
+    var availableTags = [
+        {% for tag in tags %}
+            "{{ tag.title }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    function split(val) { return val.split(/,\s*/); }
+    function extractLast(term) { return split(term).pop(); }
+
+    $("#id_tags").autocomplete({
+        minLength: 1,
+        source: function(request, response) {
+            var term = extractLast(request.term);
+            var matches = $.grep(availableTags, function(tag) {
+                return tag.toLowerCase().indexOf(term.toLowerCase()) === 0;
+            });
+            response(matches);
+        },
+        focus: function() { return false; },
+        select: function(event, ui) {
+            var terms = split(this.value);
+            terms.pop();
+            terms.push(ui.item.value);
+            terms.push("");
+            this.value = terms.join(", ");
+            return false;
+        }
+    });
+});
+</script>
+
+</body>
+</html>

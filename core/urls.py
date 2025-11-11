@@ -1,13 +1,18 @@
 from django.urls import path
-from django.views.generic import DetailView
-from core.views import IndexView, QuestionDetailView
-from core.models import Question
+from core import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', IndexView.as_view(), name='index'),
-    path(
-        'questions/<int:id>/',
-        QuestionDetailView.as_view(),
-        name='question_detail'
-    ),
+    path('', views.IndexView.as_view(), name='index'),
+    path('questions/<int:id>/', views.QuestionDetailView.as_view(), name='question_detail'),
+    path('tag/<str:title>/', views.TagView.as_view(), name='tag_page'),
+    path('ask/', views.AskQuestionView.as_view(), name='ask_question'),
+    path('settings/', views.UserSettingsView.as_view(), name='user_settings'),
+    path('login/', views.LoginView.as_view(), name='login'),
+    path('signup/', views.SignupView.as_view(), name='signup'),
+    path('logout/', views.logout_view, name='logout_view'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django.utils.text import slugify
+from PIL import Image
 
 
 class DefaultModel(models.Model):
@@ -15,6 +16,22 @@ class DefaultModel(models.Model):
 
 class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.avatar:
+            img_path = self.avatar.path
+            img = Image.open(img_path)
+
+            max_size = (50, 50)
+            img.thumbnail(max_size, Image.LANCZOS)
+
+            if img.format == 'JPEG' or img.format == 'JPG':
+                img.save(img_path, format='JPEG', quality=85)
+            else:
+                img.save(img_path)
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'

@@ -144,15 +144,6 @@ aside {
     transition: .15s ease-in-out;
 }
 
-.pagination a {
-    text-decoration: none;
-    color: white;
-    background: rgba(0, 0, 0, .2);
-    padding: 6px;
-    border-radius: 4px;
-    transition: .15s ease-in-out;
-}
-
 .pagination a:hover, a:focus-visible {
     background: rgba(0, 0, 0, .4);
 }
@@ -190,4 +181,174 @@ aside {
 
 .best-users li {
     margin-bottom: 4px;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+}
+
+.login-form, .signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.login-form input, .signup-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.login-form button, .signup-form button {
+    padding: 10px;
+    background-color: var(--primary_green);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.login-form button:hover, .signup-form button:hover {
+    background-color: #37c96e;
+}
+
+.auth-buttons a {
+    text-decoration: none;
+    color: white;
+    background-color: var(--primary_green);
+    padding: 6px 12px;
+    border-radius: 5px;
+    margin-right: 4px;
+}
+
+.auth-buttons a:hover {
+    background-color: #37c96e;
+}
+
+.ask_button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+.ask_button:hover {
+  background-color: #0056b3;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.avatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.profile-actions a {
+  margin-right: 10px;
+  text-decoration: none;
+  color: #007bff;
+}
+
+.profile-actions a:hover {
+  text-decoration: underline;
+}
+
+.correct-answer {
+  border: 2px solid #28a745;
+  background-color: #e9fbe9;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.correct-label {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.mark-correct-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.mark-correct-btn:hover {
+  background-color: #0056b3;
+}
+
+.badge {
+  display: inline-block;
+  background-color: green;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.answer {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px;
+    margin: 8px 0;
+    background-color: #fafafa;
+}
+
+.answer-author {
+    font-size: 0.9em;
+    color: gray;
+}
+
+textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+}
+
+button {
+    margin-top: 6px;
+    background-color: var(--primary_green);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #37c96e;
+}
+
+.tag:hover {
+    background-color: var(--primary_green);
+    color: white;
+    transition: 0.2s;
+}
+
+input[name="guest_name"] {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }

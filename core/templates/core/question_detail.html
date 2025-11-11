@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/question.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="icon" href="{% static 'images/layout-list.svg' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,14 +22,28 @@
             <button class="search-button">ASK!</button>
         </div>
         <div class="profile">
-            <div class="avatar"></div>
-            <div class="profile-info">
-                <p>FIO</p>
-                <div class="profile-actions">
-                    <a href="#">settings</a>
-                    <a href="#">logout</a>
+            {% if user.is_authenticated %}
+                <div class="avatar">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
+                    {% else %}
+                        <img src="{% static 'images/avatar-default.svg' %}" alt="{{ user.username }}">
+                    {% endif %}
                 </div>
-            </div>
+                <div class="profile-info">
+                    <p>{{ user.username }}</p>
+                    <div class="profile-actions">
+                        <a href="{% url 'user_settings' %}">settings</a>
+                        <a href="{% url 'logout_view' %}">logout</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="profile-info">
+                    <p>Вы не авторизованы</p>
+                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'signup' %}">Signup</a>
+                </div>
+            {% endif %}
         </div>
     </header>
     <main>
@@ -39,7 +53,7 @@
         <p><strong>Автор:</strong> {{ question.author.username }}</p>
         <p><strong>Теги:</strong>
             {% for tag in question.tags.all %}
-                <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>{% if not forloop.last %}, {% endif %}
+                <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>
             {% empty %}
                 Нет тегов
             {% endfor %}
@@ -76,44 +90,33 @@
                     {% endif %}
                     {% if answer.is_correct %}
                         <span class="badge">Правильный ответ</span>
-                    {% else %}
-                        <span class="badge">Ответ на проверке у автора</span>
                     {% endif %}
 
-                    {% if question.author == user %}
-                        <form method="post" action="">
-                            {% csrf_token %}
-                            <input type="hidden" name="toggle_correct" value="{{ answer.id }}">
-                            {% if answer.is_correct %}
-                                <button type="submit">Снять метку правильного ответа</button>
-                            {% else %}
-                                <button type="submit">Отметить как правильный</button>
-                            {% endif %}
+                    {% if user.is_authenticated and user == question.author and not answer.is_correct %}
+                        <form method="post">
+                          {% csrf_token %}
+                          <input type="hidden" name="mark_correct" value="{{ answer.id }}">
+                          <button type="submit" class="mark-correct-btn">Отметить как правильный</button>
                         </form>
-                    {% endif %}
+                      {% endif %}
                 </div>
             {% empty %}
                 <p>Пока нет ответов.</p>
             {% endfor %}
         </div>
 
+        {% if new_questions.paginator.num_pages > 1 %}
         <div class="pagination">
-            {% if answers_page.paginator.num_pages > 1 %}
-                {% if answers_page.has_previous %}
-                    <a href="?page={{ answers_page.previous_page_number }}">←</a>
+            {% for page_num in pages %}
+                {% if page_num == new_questions.number %}
+                    <span class="current">{{ page_num }}</span>
+                {% else %}
+                    <a href="?page={{ page_num }}">{{ page_num }}</a>
                 {% endif %}
-                {% for num in answers_page.paginator.page_range %}
-                    {% if num == answers_page.number %}
-                        <strong>{{ num }}</strong>
-                    {% else %}
-                        <a href="?page={{ num }}">{{ num }}</a>
-                    {% endif %}
-                {% endfor %}
-                {% if answers_page.has_next %}
-                    <a href="?page={{ answers_page.next_page_number }}">→</a>
-                {% endif %}
-            {% endif %}
+            {% endfor %}
         </div>
+        {% endif %}
+
 
         {% if user.is_authenticated %}
         <h3>Добавить ответ</h3>
@@ -134,9 +137,18 @@
                 <h3>Популярные теги</h3>
                 <div class="tags">
                     {% for tag in tags %}
-                        <a href="/?tag={{ tag.title }}" class="tag">{{ tag.title }}</a>
+                        <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>
                     {% endfor %}
                 </div>
+            </div>
+
+            <div class="best-users">
+                <h3>Лучшие пользователи</h3>
+                <ul>
+                    {% for user in best_users %}
+                        <li>{{ user.username }}</li>
+                    {% endfor %}
+                </ul>
             </div>
         </aside>
     </main>
