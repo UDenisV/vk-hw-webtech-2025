@@ -1,137 +1,65 @@
-{% load static %}
+{% extends "core/base.html" %}
+{% block title %}Main page{% endblock %}
+{% block content %}
+<h2>
+  Questions
+  <span>
+    <a href="/?sort=date" {% if sort == 'date' %}class="active"{% endif %}>New</a> |
+    <a href="/?sort=rating" {% if sort == 'rating' %}class="active"{% endif %}>Hot</a>
+  </span>
+</h2>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="icon" href="{% static 'images/layout-list.svg' %}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Coming+Soon&display=swap" rel="stylesheet">
-    <title>Домашнее задание 1</title>
-</head>
-<body>
-    <header>
-        <div class="logo">
-            <a href="{% url 'index' %}">AskPumpkin</a>
-        </div>
-        <div class="search">
-            <input type="text" name="search" placeholder="search">
-            <button class="search-button">ASK!</button>
-        </div>
-        <div class="profile">
-            {% if user.is_authenticated %}
-                <div class="avatar">
-                    {% if user.avatar %}
-                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
-                    {% else %}
-                        <img src="{% static 'images/avatar-default.svg' %}" alt="{{ user.username }}">
-                    {% endif %}
-                </div>
-                <div class="profile-info">
-                    <p>{{ user.username }}</p>
-                    <div class="profile-actions">
-                        <a href="{% url 'user_settings' %}">settings</a>
-                        <a href="{% url 'logout_view' %}">logout</a>
-                    </div>
-                </div>
-            {% else %}
-                <div class="profile-info">
-                    <p>Вы не авторизованы</p>
-                    <a href="{% url 'login' %}">Login</a>
-                    <a href="{% url 'signup' %}">Signup</a>
-                </div>
-            {% endif %}
-        </div>
-    </header>
-    <main>
-    <div class="main-container">
-            <h2>
-                Questions
-                <span>
-                    <a href="/?sort=date" {% if sort == 'date' %}class="active"{% endif %}>New</a> |
-                    <a href="/?sort=rating" {% if sort == 'rating' %}class="active"{% endif %}>Hot</a>
-                </span>
-            </h2>
+{% if user.is_authenticated %}
+  <div class="ask-question-button" style="margin-top:10px;">
+    <a href="{% url 'ask_question' %}" class="ask_button">Ask question</a>
+  </div>
+{% endif %}
 
-            {% if user.is_authenticated %}
-                <div class="ask-question-button" style="margin-top:10px;">
-                    <a href="{% url 'ask_question' %}" class="ask_button">Задать вопрос</a>
-                </div>
-            {% endif %}
+<div class="questions-list">
+  {% for question in new_questions %}
+    <div class="question">
+      <a href="{% url 'question' question.id %}" class="question-title">{{ question.title }}</a>
+      <p class="question-content">{{ question.detailed }}</p>
+      <p>Tags:
+        {% for tag in question.tags.all %}
+          <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>
+        {% empty %} No tags {% endfor %}
+      </p>
+      <p><a href="{% url 'question' question.id %}">Answers: {{ question.answer_set.count }}</a></p>
+      <p>Rating: {{ question.rating }}</p>
 
-            <div class="questions-list">
-                {% for question in new_questions %}
-                    <div class="question">
-                        <a href="{% url 'question_detail' question.id %}" class="question-title">
-                            {{ question.title }}
-                        </a>
-                        <p class="question-content">{{ question.detailed }}</p>
-                        <p>Теги:
-                            {% for tag in question.tags.all %}
-                                <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>
-                            {% empty %}
-                                Нет тегов
-                            {% endfor %}
-                        </p>
-
-                        <p>
-                            <a href="{% url 'question_detail' question.id %}">
-                                Ответов: {{ question.answer_set.count }}
-                            </a>
-                        </p>
-
-                        <p>Рейтинг: {{ question.rating }}</p>
-
-                        {% if user.is_authenticated %}
-                            <form method="post" action="{% url 'index' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="question_id" value="{{ question.id }}">
-                                <button type="submit" name="vote" value="up">+</button>
-                                <button type="submit" name="vote" value="down">-</button>
-                            </form>
-                        {% else %}
-                            <p>Авторизуйтесь, чтобы голосовать</p>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
-            {% if new_questions.paginator.num_pages > 1 %}
-            <div class="pagination">
-                {% for page_num in pages %}
-                    {% if page_num == new_questions.number %}
-                        <span class="current">{{ page_num }}</span>
-                    {% else %}
-                        <a href="?page={{ page_num }}">{{ page_num }}</a>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            {% endif %}
-
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'index' %}">
+          {% csrf_token %}
+          <input type="hidden" name="question_id" value="{{ question.id }}">
+          <button type="submit" name="vote" value="up">+</button>
+          <button type="submit" name="vote" value="down">-</button>
+        </form>
+      {% else %}
+        <p>Login to vote</p>
+      {% endif %}
     </div>
+  {% endfor %}
+</div>
 
-    <aside>
-        <div class="tags-container">
-            <h3>Популярные теги</h3>
-            <div class="tags">
-                {% for tag in tags %}
-                    <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>
-                {% endfor %}
-            </div>
-        </div>
+{% if new_questions.paginator.num_pages > 1 %}
+<div class="pagination">
+    {% if new_questions.has_previous %}
+        <a href="?page={{ new_questions.previous_page_number }}{% if sort %}&sort={{ sort }}{% endif %}">« Prev</a>
+    {% endif %}
 
-        <div class="best-users">
-            <h3>Лучшие пользователи</h3>
-            <ul>
-                {% for user in best_users %}
-                    <li>{{ user.username }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </aside>
-</main>
+    {% for num in new_questions.paginator.page_range %}
+        {% if num == new_questions.number %}
+            <span class="current">{{ num }}</span>
+        {% else %}
+            <a href="?page={{ num }}{% if sort %}&sort={{ sort }}{% endif %}">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
 
-</body>
-</html>
+    {% if new_questions.has_next %}
+        <a href="?page={{ new_questions.next_page_number }}{% if sort %}&sort={{ sort }}{% endif %}">Next »</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

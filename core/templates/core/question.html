@@ -1,0 +1,92 @@
+{% extends "core/base.html" %}
+{% block title %}{{ question.title }}{% endblock %}
+
+{% block content %}
+<h2>{{ question.title }}</h2>
+<p>{{ question.detailed }}</p>
+<p><strong>Author:</strong> {{ question.author.username }}</p>
+<p><strong>Tags:</strong>
+    {% for tag in question.tags.all %}
+        <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>{% if not forloop.last %}, {% endif %}
+    {% empty %}No tags{% endfor %}
+</p>
+<p>Rating: {{ question.rating }}</p>
+
+{% if user.is_authenticated %}
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="vote_question" value="up">+</button>
+    <button type="submit" name="vote_question" value="down">-</button>
+</form>
+{% else %}
+<p>Login to vote</p>
+{% endif %}
+
+<h3>Answers</h3>
+<div class="answers-list">
+    {% for answer in answers_page %}
+        <div class="answer {% if answer.is_correct %}correct-answer{% endif %}">
+            <p>{{ answer.answer_text }}</p>
+            <small>Author: {{ answer.author.username }} | {{ answer.created_at|date:"d.m.Y H:i" }}</small>
+            <p>Rating: {{ answer.rating|default:"0" }}</p>
+
+            {% if user.is_authenticated %}
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="vote_answer" value="{{ answer.id }}">
+                <button type="submit" name="vote_value" value="up">+</button>
+                <button type="submit" name="vote_value" value="down">-</button>
+            </form>
+            {% else %}
+            <p>Login to vote</p>
+            {% endif %}
+
+            {% if answer.is_correct %}
+                <span class="badge">Correct answer</span>
+            {% endif %}
+
+            {% if user.is_authenticated and user == question.author and not answer.is_correct %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="mark_correct" value="{{ answer.id }}">
+                <button type="submit" class="mark-correct-btn">Mark as correct</button>
+            </form>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>No answers</p>
+    {% endfor %}
+    {% if answers_page.paginator.num_pages > 1 %}
+    <div class="pagination">
+      {% if answers_page.has_previous %}
+        <a href="?page={{ answers_page.previous_page_number }}">« Prev</a>
+      {% endif %}
+
+      {% for num in answers_page.paginator.page_range %}
+        {% if num == answers_page.number %}
+          <span class="current">{{ num }}</span>
+        {% else %}
+          <a href="?page={{ num }}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if answers_page.has_next %}
+        <a href="?page={{ answers_page.next_page_number }}">Next »</a>
+      {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated %}
+<h3>Add an answer</h3>
+<form method="post">
+    {% csrf_token %}
+    <textarea name="answer_text" placeholder="Your answer..." required></textarea>
+    <button type="submit">Send answer</button>
+</form>
+{% else %}
+<p>Login to add answer</p>
+{% endif %}
+
+<a href="{% url 'index' %}">← Back to list</a>
+{% endblock %}

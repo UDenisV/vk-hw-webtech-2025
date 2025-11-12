@@ -1,120 +1,53 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Вопросы с тегом {{ tag.title }}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Coming+Soon&display=swap" rel="stylesheet">
-</head>
-<body>
+{% extends "core/base.html" %}
+{% block title %}Questions with tag: "{{ tag.title }}"{% endblock %}
 
-    <header>
-        <div class="logo">
-            <a href="{% url 'index' %}">AskPumpkin</a>
-        </div>
-        <div class="search">
-            <input type="text" name="search" placeholder="search">
-            <button class="search-button">ASK!</button>
-        </div>
-        <div class="profile">
-            {% if user.is_authenticated %}
-                <div class="avatar">
-                    {% if user.avatar %}
-                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
-                    {% else %}
-                        <img src="{% static 'images/avatar-default.svg' %}" alt="{{ user.username }}">
-                    {% endif %}
-                </div>
-                <div class="profile-info">
-                    <p>{{ user.username }}</p>
-                    <div class="profile-actions">
-                        <a href="{% url 'user_settings' %}">settings</a>
-                        <a href="{% url 'logout_view' %}">logout</a>
-                    </div>
-                </div>
-            {% else %}
-                <div class="profile-info">
-                    <p>Вы не авторизованы</p>
-                    <a href="{% url 'login' %}">Login</a>
-                    <a href="{% url 'signup' %}">Signup</a>
-                </div>
-            {% endif %}
-        </div>
-    </header>
+{% block content %}
+<h2>Questions with tag: "{{ tag.title }}"</h2>
 
-<main>
-<div class="main-container">
-    <h2>Вопросы с тегом: {{ tag.title }}</h2>
+{% for question in questions %}
+    <div class="question">
+        <a href="{% url 'question' question.id %}" class="question-title">{{ question.title }}</a>
+        <p class="question-content">{{ question.detailed|truncatechars:200 }}</p>
+        <p>Author: {{ question.author.username }}</p>
+        <p>Answers: {{ question.answer_set.count }}</p>
+        <p>Tags:
+            {% for tag in question.tags.all %}
+                <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>{% if not forloop.last %}, {% endif %}
+            {% empty %}No tags{% endfor %}
+        </p>
+        <p>Rating: {{ question.rating }}</p>
 
-    {% for question in questions %}
-        <div class="question">
-            <a href="{% url 'question_detail' question.id %}" class="question-title">
-                {{ question.title }}
-            </a>
-            <p class="question-content">{{ question.detailed|truncatechars:200 }}</p>
-            <p>Автор: {{ question.author.username }}</p>
-            <p>Ответов: {{ question.answer_set.count }}</p>
-
-            <p>Теги:
-                {% for tag in question.tags.all %}
-                    <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>{% if not forloop.last %}, {% endif %}
-                {% empty %}
-                    Нет тегов
-                {% endfor %}
-            </p>
-
-            <p>Рейтинг: {{ question.rating }}</p>
-
-            {% if user.is_authenticated %}
-                <form method="post" action="">
-                    {% csrf_token %}
-                    <input type="hidden" name="question_id" value="{{ question.id }}">
-                    <button type="submit" name="vote" value="up">+</button>
-                    <button type="submit" name="vote" value="down">−</button>
-                </form>
-            {% else %}
-                <p>Авторизуйтесь, чтобы голосовать</p>
-            {% endif %}
-        </div>
-    {% empty %}
-        <p>Пока нет вопросов с этим тегом.</p>
-    {% endfor %}
-
-    {% if new_questions.paginator.num_pages > 1 %}
-    <div class="pagination">
-        {% for page_num in pages %}
-            {% if page_num == new_questions.number %}
-                <span class="current">{{ page_num }}</span>
-            {% else %}
-                <a href="?page={{ page_num }}">{{ page_num }}</a>
-            {% endif %}
-        {% endfor %}
+        {% if user.is_authenticated %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="question_id" value="{{ question.id }}">
+            <button type="submit" name="vote" value="up">+</button>
+            <button type="submit" name="vote" value="down">−</button>
+        </form>
+        {% else %}
+        <p>Login to vote</p>
+        {% endif %}
     </div>
-    {% endif %}
+{% empty %}
+<p>Пока нет вопросов с этим тегом.</p>
+{% endfor %}
 
+<div class="pagination">
+  {% if questions.has_previous %}
+    <a href="?page={{ questions.previous_page_number }}">« Prev</a>
+  {% endif %}
+
+  {% for num in questions.paginator.page_range %}
+    {% if num == questions.number %}
+      <span class="current">{{ num }}</span>
+    {% else %}
+      <a href="?page={{ num }}">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+
+  {% if questions.has_next %}
+    <a href="?page={{ questions.next_page_number }}">Next »</a>
+  {% endif %}
 </div>
 
-<aside>
-    <div class="tags-container">
-        <h3>Популярные теги</h3>
-        <div class="tags">
-            {% for tag in tags %}
-                <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="best-users">
-        <h3>Лучшие пользователи</h3>
-        <ul>
-            {% for user in best_users %}
-                <li>{{ user.username }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-</aside>
-</main>
-
-</body>
-</html>
+{% endblock %}

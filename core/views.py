@@ -192,7 +192,7 @@ class TagView(TemplateView):
 
 class QuestionDetailView(DetailView):
     model = Question
-    template_name = "core/question_detail.html"
+    template_name = "core/question.html"
     context_object_name = "question"
     pk_url_kwarg = "id"
     ANSWERS_PER_PAGE = 30
@@ -296,7 +296,7 @@ class AskQuestionView(View):
             tag_obj, _ = Tag.objects.get_or_create(title=tag_title)
             question.tags.add(tag_obj)
 
-        return redirect('question_detail', id=question.id)
+        return redirect('question', id=question.id)
 
 @method_decorator(login_required, name='dispatch')
 class UserSettingsView(View):
