@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from core.models import Question, Tag, Answer, Vote, AnswerVote
 from django.db import models
 from django.db.models import Sum
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 def paginate(objects_list, request, per_page=10):
     paginator = Paginator(objects_list, per_page)
@@ -347,3 +349,50 @@ class UserSettingsView(View):
             user.avatar = avatar
         user.save()
         return redirect('user_settings')
+
+@require_POST
+@login_required
+def ajax_question_vote(request):
+    question_id = request.POST.get('question_id')
+    vote_value = request.POST.get('vote')
+
+    if not question_id or vote_value not in ('up', 'down'):
+        return JsonResponse({'error': 'bad request'}, status=400)
+
+    question = get_object_or_404(Question, id=question_id)
+    value = 1 if vote_value == 'up' else -1
+
+    vote, created = Vote.objects.get_or_create(
+        user=request.user,
+        question=question,
+        defaults={'value': value}
+    )
+
+    if not created and vote.value == value:
+        return JsonResponse({'error': 'already voted'}, status=400)
+
+    vote.value = value
+    vote.save()
+
+    question.rating = Vote.objects.filter(question=question).aggregate(
+        total=Sum('value')
+    )['total'] or 0
+    question.save()
+
+    return JsonResponse({'rating': question.rating})
+
+@require_POST
+@login_required
+def ajax_mark_correct(request):
+    answer_id = request.POST.get('answer_id')
+    answer = get_object_or_404(Answer, id=answer_id)
+    question = answer.question
+
+    if request.user != question.author:
+        return JsonResponse({'error': 'forbidden'}, status=403)
+
+    Answer.objects.filter(question=question).update(is_correct=False)
+    answer.is_correct = True
+    answer.save()
+
+    return JsonResponse({'success': True, 'answer_id': answer.id})

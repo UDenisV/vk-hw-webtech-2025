@@ -13,6 +13,8 @@ urlpatterns = [
     path('signup/', views.SignupView.as_view(), name='signup'),
     path('logout/', views.logout_view, name='logout_view'),
     path('profile/edit/', views.UserSettingsView.as_view(), name='profile_edit'),
+    path('ajax/question/vote/', views.ajax_question_vote, name='ajax_question_vote'),
+    path('ajax/answer/correct/', views.ajax_mark_correct, name='ajax_mark_correct'),
 ]
 
 if settings.DEBUG:

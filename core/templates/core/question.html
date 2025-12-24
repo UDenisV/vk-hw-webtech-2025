@@ -13,11 +13,11 @@
 <p>Rating: {{ question.rating }}</p>
 
 {% if user.is_authenticated %}
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" name="vote_question" value="up">+</button>
-    <button type="submit" name="vote_question" value="down">-</button>
-</form>
+<div>
+  <button class="vote-btn" data-id="{{ question.id }}" data-vote="up">+</button>
+  <button class="vote-btn" data-id="{{ question.id }}" data-vote="down">-</button>
+  <span id="question-rating">{{ question.rating }}</span>
+</div>
 {% else %}
 <p>Login to vote</p>
 {% endif %}
@@ -93,3 +93,45 @@
 
 <a href="{% url 'index' %}">← Back to list</a>
 {% endblock %}
+
+<script>
+const csrftoken = '{{ csrf_token }}';
+
+// AJAX лайк вопроса
+document.querySelectorAll('.vote-btn').forEach(btn => {
+  btn.onclick = () => {
+    fetch("{% url 'ajax_question_vote' %}", {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `question_id=${btn.dataset.id}&vote=${btn.dataset.vote}`
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.rating !== undefined) {
+        document.getElementById('question-rating').innerText = data.rating;
+      }
+    });
+  };
+});
+
+// AJAX правильный ответ
+document.querySelectorAll('.mark-correct').forEach(btn => {
+  btn.onclick = () => {
+    fetch("{% url 'ajax_mark_correct' %}", {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `answer_id=${btn.dataset.id}`
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) location.reload();
+    });
+  };
+});
+</script>
