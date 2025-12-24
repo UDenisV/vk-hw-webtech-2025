@@ -1,4 +1,5 @@
 import math
+from .forms import LoginForm, SignupForm, AskQuestionForm, AnswerForm
 from django.views.generic import TemplateView, DetailView, View
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
@@ -31,19 +32,25 @@ def common_context():
 
 class LoginView(View):
     def get(self, request):
-        if request.user.is_authenticated:
-            return redirect('index')
-        return render(request, 'core/login.html', {**common_context(), 'error': None, 'username': ''})
+        form = LoginForm()
+        return render(request, 'core/login.html', {
+            'form': form,
+            'next': request.GET.get('continue'),
+            **common_context()
+        })
 
     def post(self, request):
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '').strip()
-        user = authenticate(request, username=username, password=password)
-        if user:
-            login(request, user)
-            return redirect('index')
-        else:
-            return render(request, 'core/login.html', {**common_context(), 'error': 'Неверный логин или пароль', 'username': username})
+        form = LoginForm(request.POST)
+        next_url = request.POST.get('continue') or 'index'
+        if form.is_valid():
+            login(request, form.cleaned_data['user'])
+            return redirect(next_url)
+        return render(request, 'core/login.html', {
+            'form': form,
+            'next': next_url,
+            **common_context()
+        })
+
 
 class SignupView(View):
     def get(self, request):
@@ -78,7 +85,8 @@ class SignupView(View):
 
 def logout_view(request):
     logout(request)
-    return redirect('index')
+    return redirect(request.META.get('HTTP_REFERER', 'index'))
+
 
 class IndexView(TemplateView):
     template_name = 'core/index.html'
@@ -245,8 +253,24 @@ class QuestionDetailView(DetailView):
 
         answer_text = request.POST.get("answer_text", "").strip()
         if answer_text and request.user.is_authenticated:
-            answer = Answer.objects.create(question=question, author=request.user, answer_text=answer_text)
+            answer = Answer.objects.create(
+                question=question,
+                author=request.user,
+                answer_text=answer_text
+            )
+
+            answers = Answer.objects.filter(question=question).order_by('-rating', '-created_at')
+            paginator = Paginator(answers, self.ANSWERS_PER_PAGE)
+
+            for page_num in paginator.page_range:
+                page = paginator.page(page_num)
+                if answer in page.object_list:
+                    return redirect(
+                        f"{request.path}?page={page_num}#answer-{answer.id}"
+                    )
+
         return redirect(request.path)
+
 
 @method_decorator(login_required, name='dispatch')
 class AskQuestionView(View):

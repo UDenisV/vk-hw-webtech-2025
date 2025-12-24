@@ -25,7 +25,10 @@
 <h3>Answers</h3>
 <div class="answers-list">
     {% for answer in answers_page %}
-        <div class="answer {% if answer.is_correct %}correct-answer{% endif %}">
+    <div
+        class="answer {% if answer.is_correct %}correct-answer{% endif %}"
+        id="answer-{{ answer.id }}"
+    >
             <p>{{ answer.answer_text }}</p>
             <small>Author: {{ answer.author.username }} | {{ answer.created_at|date:"d.m.Y H:i" }}</small>
             <p>Rating: {{ answer.rating|default:"0" }}</p>

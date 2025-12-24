@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django.utils.text import slugify
 from PIL import Image
+from django.contrib.auth.models import User
 
 
 class DefaultModel(models.Model):
@@ -115,3 +116,10 @@ class Vote(models.Model):
 
     def __str__(self):
         return f"{self.user.username} -> {self.question.title}: {self.value}"
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', blank=True)
+
+    def __str__(self):
+        return self.user.username
