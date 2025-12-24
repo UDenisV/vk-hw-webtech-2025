@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+
+{% block title %}Search results for "{{ query }}"{% endblock %}
+
+{% block content %}
+<h2>Search results for "{{ query }}"</h2>
+
+{% if questions %}
+    <div class="question-list">
+        {% for question in questions %}
+            <div class="question-item">
+                <h3><a href="{% url 'question' question.id %}">{{ question.title }}</a></h3>
+                <p>{{ question.detailed|truncatechars:200 }}</p>
+                <p>
+                    <strong>Author:</strong> {{ question.author.username }} |
+                    <strong>Rating:</strong> {{ question.rating }}
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if questions.has_other_pages %}
+    <div class="pagination">
+        {% if questions.has_previous %}
+            <a href="?q={{ query }}&page={{ questions.previous_page_number }}">« Prev</a>
+        {% endif %}
+
+        {% for num in questions.paginator.page_range %}
+            {% if num == questions.number %}
+                <span class="current">{{ num }}</span>
+            {% else %}
+                <a href="?q={{ query }}&page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if questions.has_next %}
+            <a href="?q={{ query }}&page={{ questions.next_page_number }}">Next »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+{% else %}
+    <p>No results found for "{{ query }}"</p>
+{% endif %}
+{% endblock %}
+
+<aside>
+    <div class="tags-container">
+        <h3>Popular Tags</h3>
+        <div class="tags">
+            {% for tag in tags %}
+                <a href="{% url 'tag_page' tag.title %}" class="tag">{{ tag.title }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="best-users">
+        <h3>Best Members</h3>
+        <ul>
+            {% for u in best_users %}
+                <li>{{ u.username }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</aside>

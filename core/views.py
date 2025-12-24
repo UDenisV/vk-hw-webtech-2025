@@ -1,5 +1,5 @@
 import math
-from .forms import LoginForm, SignupForm, AskQuestionForm, AnswerForm
+from .forms import LoginForm
 from django.views.generic import TemplateView, DetailView, View
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
@@ -13,6 +13,20 @@ from django.db import models
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.core.cache import cache
+from django.utils import timezone
+from datetime import timedelta
+from django.views import View
+from django.views.generic import ListView
+
+def search_suggestions(request):
+    q = request.GET.get('q', '').strip()
+    if not q:
+        return JsonResponse({'results': []})
+    questions = Question.objects.filter(title__icontains=q)[:5]
+    results = [{'id': q.id, 'title': q.title} for q in questions]
+    return JsonResponse({'results': results})
+
 
 def paginate(objects_list, request, per_page=10):
     paginator = Paginator(objects_list, per_page)
@@ -31,6 +45,37 @@ def common_context():
         'tags': Tag.objects.all(),
         'best_users': User.objects.order_by('-id')[:5],
     }
+
+class SearchView(ListView):
+    model = Question
+    template_name = 'core/search_results.html'
+    context_object_name = 'questions'
+    paginate_by = 10
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            return Question.objects.filter(
+                models.Q(title__icontains=q) | models.Q(detailed__icontains=q)
+            ).order_by('-created_at')
+        return Question.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(common_context())
+        context['query'] = self.request.GET.get('q', '')
+        return context
+
+class SearchSuggestionsView(View):
+    def get(self, request):
+        query = request.GET.get('q', '').strip()
+        results = []
+        if query:
+            questions = Question.objects.filter(
+                models.Q(title__icontains=query) | models.Q(detailed__icontains=query)
+            )[:10]
+            results = [{'id': q.id, 'title': q.title} for q in questions]
+        return JsonResponse({'results': results})
 
 class LoginView(View):
     def get(self, request):
@@ -396,3 +441,28 @@ def ajax_mark_correct(request):
     answer.save()
 
     return JsonResponse({'success': True, 'answer_id': answer.id})
+
+def get_popular_tags():
+    data = cache.get("popular_tags")
+    if data is None:
+        three_months_ago = timezone.now() - timedelta(days=90)
+        data = Tag.objects.annotate(num_questions=models.Count('question', filter=models.Q(question__created_at__gte=three_months_ago)))\
+                          .order_by('-num_questions')[:10]
+        cache.set("popular_tags", data, 3600)
+    return data
+
+def get_best_users():
+    data = cache.get("best_users")
+    if data is None:
+        one_week_ago = timezone.now() - timedelta(days=7)
+        data = User.objects.annotate(
+            score=models.Sum(
+                models.Case(
+                    models.When(question__created_at__gte=one_week_ago, then='question__rating'),
+                    models.When(answer__created_at__gte=one_week_ago, then='answer__rating'),
+                    default=0
+                )
+            )
+        ).order_by('-score')[:10]
+        cache.set("best_users", data, 3600)
+    return data

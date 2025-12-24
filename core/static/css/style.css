@@ -352,3 +352,19 @@ input[name="guest_name"] {
     border: 1px solid #ccc;
     border-radius: 5px;
 }
+
+.suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+}
+.suggestion-item {
+    padding: 5px 10px;
+}
+.suggestion-item:hover {
+    background: #f0f0f0;
+}

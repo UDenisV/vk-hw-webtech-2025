@@ -94,30 +94,30 @@
 <a href="{% url 'index' %}">← Back to list</a>
 {% endblock %}
 
+{% block scripts %}
 <script>
-const csrftoken = '{{ csrf_token }}';
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('vote-btn')) {
+        e.preventDefault();
+        console.log('CLICK WORKS');
 
-// AJAX лайк вопроса
-document.querySelectorAll('.vote-btn').forEach(btn => {
-  btn.onclick = () => {
-    fetch("{% url 'ajax_question_vote' %}", {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrftoken,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `question_id=${btn.dataset.id}&vote=${btn.dataset.vote}`
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.rating !== undefined) {
-        document.getElementById('question-rating').innerText = data.rating;
-      }
-    });
-  };
+        fetch("{% url 'ajax_question_vote' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `question_id=${e.target.dataset.id}&vote=${e.target.dataset.vote}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.rating !== undefined) {
+                document.getElementById('question-rating').innerText = data.rating;
+            }
+        });
+    }
 });
 
-// AJAX правильный ответ
 document.querySelectorAll('.mark-correct').forEach(btn => {
   btn.onclick = () => {
     fetch("{% url 'ajax_mark_correct' %}", {
@@ -135,3 +135,4 @@ document.querySelectorAll('.mark-correct').forEach(btn => {
   };
 });
 </script>
+{% endblock %}

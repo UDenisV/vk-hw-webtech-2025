@@ -15,6 +15,8 @@ urlpatterns = [
     path('profile/edit/', views.UserSettingsView.as_view(), name='profile_edit'),
     path('ajax/question/vote/', views.ajax_question_vote, name='ajax_question_vote'),
     path('ajax/answer/correct/', views.ajax_mark_correct, name='ajax_mark_correct'),
+    path('search/', views.SearchView.as_view(), name='search'),
+    path('ajax/search_suggestions/', views.search_suggestions, name='search_suggestions'),
 ]
 
 if settings.DEBUG:
